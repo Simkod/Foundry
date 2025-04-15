@@ -11,6 +11,13 @@ contract SimpleBankTest is Test {
         bank = new SimpleBank();
     }
 
+    /*
+     * @notice Optional function that configures a set of transactions to be executed before test.
+     * @param testSelector elector of the test for which transactions are applied.
+     */
+    function beforeTestSetup(bytes4 testSelector) public returns (bytes[] memory beforeTestCalldata) {
+    }
+
     function test_Deposit() public {
     }
 
