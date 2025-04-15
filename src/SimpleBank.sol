@@ -17,7 +17,7 @@ contract SimpleBank {
 
     function withdraw(uint256 amount) external payable{
         require(amount > 0, "A Withdrawal must be greater than zero!");
-        require(balances[msg.sender] >= amount, "Insufficent balance for withdrawal! Your Balance:" + balances[msg.sender].toString());
+        require(balances[msg.sender] >= amount, string(abi.encodePacked("Insufficent balance for withdrawal! Your Balance: ", Strings.toString(balances[msg.sender]))));
 
         balances[msg.sender] -= amount;
         payable(msg.sender).transfer(amount);
