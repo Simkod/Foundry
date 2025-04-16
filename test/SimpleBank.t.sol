@@ -25,9 +25,9 @@ contract SimpleBankTest is Test {
         return beforeTestCalldata;
     }
 
-    // Helper function to fund user and deposit 1 ETH
+    // Helper function to fund user
     function setupDeposit(uint256 amount) public {
-        vm.deal(user, amount); // Fund user with 1 ETH
+        vm.deal(user, amount); // Fund user
         vm.prank(user);
         bank.deposit{value: amount}(); // Deposit as user
     }
