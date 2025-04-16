@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "@openzeppelin/contracts/utils/Strings.sol";
-
 contract SimpleBank {
     mapping(address => uint256) private balances;
 
@@ -11,6 +9,7 @@ contract SimpleBank {
 
     error ZeroDeposit();
     error ZeroWithdrawal();
+    error InsufficentBalance();
 
     function deposit() external payable{
         if (msg.value == 0) revert ZeroDeposit();
@@ -20,7 +19,7 @@ contract SimpleBank {
 
     function withdraw(uint256 amount) external payable{
         if (amount == 0) revert ZeroWithdrawal();
-        require(balances[msg.sender] >= amount, string(abi.encodePacked("Insufficent balance for withdrawal! Your Balance: ", Strings.toString(balances[msg.sender]))));
+        if (balances[msg.sender] <= amount) revert InsufficentBalance();
 
         balances[msg.sender] -= amount;
         payable(msg.sender).transfer(amount);

@@ -17,7 +17,19 @@ contract SimpleBankTest is Test {
      * @param testSelector elector of the test for which transactions are applied.
      */
     function beforeTestSetup(bytes4 testSelector) public returns (bytes[] memory beforeTestCalldata) {
+        if (testSelector == this.test_Withdraw_InsufficientBalance.selector  ||
+            testSelector == this.test_Withdraw.selector) {
+            beforeTestCalldata = new bytes[](1);
+            beforeTestCalldata[0] = abi.encodeWithSelector(this.setupDeposit.selector);
+            }
+        return beforeTestCalldata;
+    }
 
+    // Helper function to fund user and deposit 1 ETH
+    function setupDeposit() public {
+        vm.deal(user, 1 ether); // Fund user with 1 ETH
+        vm.prank(user);
+        bank.deposit{value: 1 ether}(); // Deposit as user
     }
 
     function test_Deposit() public {
@@ -35,7 +47,6 @@ contract SimpleBankTest is Test {
         assertEq(address(bank).balance, depositAmount);
     }
 
-    // Test deposit with zero ETH (should revert)
     function test_Deposit_Zero() public {
         vm.expectRevert(SimpleBank.ZeroDeposit.selector);
         bank.deposit{value: 0}();
@@ -59,8 +70,19 @@ contract SimpleBankTest is Test {
     */
 
     function test_Withdraw() public {
-        //selector for test_withdraw - deposit 1 eth for user1 and 2eth for user 2
+        //assertEq(user.balance, 1 ether);
+    }
 
+    function test_Withdraw_InsufficientBalance() public {
+        // Attempt to withdraw 2 ETH (more than balance)
+        vm.prank(user); // Note: only next call will be from user's thanks to vm.prank()
+        vm.expectRevert(SimpleBank.InsufficentBalance.selector);
+        bank.withdraw(2 ether);
+    }
+
+    function test_Withdraw_Zero() public {
+        vm.expectRevert(SimpleBank.ZeroWithdrawal.selector);
+        bank.withdraw(0);
     }
 
     function testFuzz_Withdraw(uint256 x) public {
