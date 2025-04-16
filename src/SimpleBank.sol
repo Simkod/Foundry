@@ -19,7 +19,7 @@ contract SimpleBank {
 
     function withdraw(uint256 amount) external payable{
         if (amount == 0) revert ZeroWithdrawal();
-        if (balances[msg.sender] <= amount) revert InsufficentBalance();
+        if (balances[msg.sender] < amount) revert InsufficentBalance();
 
         balances[msg.sender] -= amount;
         payable(msg.sender).transfer(amount);
