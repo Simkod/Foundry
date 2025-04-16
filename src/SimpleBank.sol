@@ -9,14 +9,17 @@ contract SimpleBank {
     event Deposit(address indexed user, uint256 amount);
     event Withdrawal(address indexed user, uint256 amount);
 
+    error ZeroDeposit();
+    error ZeroWithdrawal();
+
     function deposit() external payable{
-        require(msg.value > 0, "A Deposit must be greater than zero!");
+        if (msg.value == 0) revert ZeroDeposit();
         balances[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
     }
 
     function withdraw(uint256 amount) external payable{
-        require(amount > 0, "A Withdrawal must be greater than zero!");
+        if (amount == 0) revert ZeroWithdrawal();
         require(balances[msg.sender] >= amount, string(abi.encodePacked("Insufficent balance for withdrawal! Your Balance: ", Strings.toString(balances[msg.sender]))));
 
         balances[msg.sender] -= amount;

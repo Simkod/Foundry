@@ -17,6 +17,7 @@ contract SimpleBankTest is Test {
      * @param testSelector elector of the test for which transactions are applied.
      */
     function beforeTestSetup(bytes4 testSelector) public returns (bytes[] memory beforeTestCalldata) {
+
     }
 
     function test_Deposit() public {
@@ -34,11 +35,32 @@ contract SimpleBankTest is Test {
         assertEq(address(bank).balance, depositAmount);
     }
 
-    function test_Withdraw() public {
-        //selector for test_withdraw - deposit 1 eth for user1 and 2eth for user 2
+    // Test deposit with zero ETH (should revert)
+    function test_Deposit_Zero() public {
+        vm.expectRevert(SimpleBank.ZeroDeposit.selector);
+        bank.deposit{value: 0}();
     }
 
+/*
     function testFuzz_Deposit(uint256 x) public {
+        uint256 depositAmount = x;
+        vm.deal(user, depositAmount); // Give the user some ETH
+        uint256 before = user.balance;
+        // Makes all subsequent transactions in the test (until vm.stopPrank() is called)
+        // behave as if they were sent by the user address, i.e., msg.sender and tx.origin are set to user.
+        vm.startPrank(user);
+        bank.deposit{value: depositAmount}();
+        assertEq(bank.getBalance(), depositAmount); //needs to run here so that msg.sender is the user
+        vm.stopPrank();
+
+        assertEq(user.balance, before - depositAmount);
+        assertEq(address(bank).balance, depositAmount);
+    }
+    */
+
+    function test_Withdraw() public {
+        //selector for test_withdraw - deposit 1 eth for user1 and 2eth for user 2
+
     }
 
     function testFuzz_Withdraw(uint256 x) public {
