@@ -27,7 +27,7 @@ contract SimpleBank {
         emit Withdrawal(msg.sender, amount);
     }
 
-    function getBalance() external view returns (uint256){
+    function getUserBalance() external view returns (uint256){
         return balances[msg.sender];
     }
 }

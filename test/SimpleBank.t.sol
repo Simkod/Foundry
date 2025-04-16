@@ -16,7 +16,7 @@ contract SimpleBankTest is Test {
      * @notice Optional function that configures a set of transactions to be executed before test.
      * @param testSelector elector of the test for which transactions are applied.
      */
-    function beforeTestSetup(bytes4 testSelector) public returns (bytes[] memory beforeTestCalldata) {
+    function beforeTestSetup(bytes4 testSelector) public pure returns (bytes[] memory beforeTestCalldata) {
         if (testSelector == this.test_Withdraw_InsufficientBalance.selector  ||
             testSelector == this.test_Withdraw.selector) {
             beforeTestCalldata = new bytes[](1);
@@ -38,9 +38,11 @@ contract SimpleBankTest is Test {
         uint256 before = user.balance;
         // Makes all subsequent transactions in the test (until vm.stopPrank() is called)
         // behave as if they were sent by the user address, i.e., msg.sender and tx.origin are set to user.
+        vm.expectEmit(true, false, false, true);
+        emit SimpleBank.Deposit(user, depositAmount);
         vm.startPrank(user);
         bank.deposit{value: depositAmount}();
-        assertEq(bank.getBalance(), depositAmount); //needs to run here so that msg.sender is the user
+        assertEq(bank.getUserBalance(), depositAmount); //needs to run here so that msg.sender is the user
         vm.stopPrank();
 
         assertEq(user.balance, before - depositAmount);
@@ -61,7 +63,7 @@ contract SimpleBankTest is Test {
         // behave as if they were sent by the user address, i.e., msg.sender and tx.origin are set to user.
         vm.startPrank(user);
         bank.deposit{value: depositAmount}();
-        assertEq(bank.getBalance(), depositAmount); //needs to run here so that msg.sender is the user
+        assertEq(bank.getUserBalance(), depositAmount); //needs to run here so that msg.sender is the user
         vm.stopPrank();
 
         assertEq(user.balance, before - depositAmount);
@@ -70,14 +72,27 @@ contract SimpleBankTest is Test {
     */
 
     function test_Withdraw() public {
-        //assertEq(user.balance, 1 ether);
+        uint256 withdrawAmount = 0.6 ether;
+        uint256 startContractBalance = address(bank).balance;
+
+        vm.startPrank(user);
+        uint256 startUserBalance = bank.getUserBalance();
+
+        vm.expectEmit(true, false, false, true);
+        emit SimpleBank.Withdrawal(user, withdrawAmount);
+        bank.withdraw(withdrawAmount);
+
+        assertEq(bank.getUserBalance(), startUserBalance - withdrawAmount);
+        vm.stopPrank();
+
+        assertEq(address(bank).balance, startContractBalance - withdrawAmount);
+        assertEq(user.balance, withdrawAmount);
     }
 
     function test_Withdraw_InsufficientBalance() public {
-        // Attempt to withdraw 2 ETH (more than balance)
         vm.prank(user); // Note: only next call will be from user's thanks to vm.prank()
         vm.expectRevert(SimpleBank.InsufficentBalance.selector);
-        bank.withdraw(2 ether);
+        bank.withdraw(2 ether); // Withdraw more than deposited
     }
 
     function test_Withdraw_Zero() public {
